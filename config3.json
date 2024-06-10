@@ -1,0 +1,159 @@
+{
+    "resource_group": "wus_lab_1_3",
+    "network_address_prefix": "10.0.0.0/16",
+    "network_security_group": [
+        {
+            "name": "frontendNSG",
+            "rule": [
+                {
+                    "name": "frontendRule",
+                    "priority": 1000,
+                    "source_address_prefix": "*",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 8080
+                },
+                {
+                    "name": "SSH",
+                    "priority": 1010,
+                    "source_address_prefix": "*",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 22
+                }
+            ]
+        },
+        {
+            "name": "backendNSG",
+            "rule": [
+                {
+                    "name": "backendRule",
+                    "priority": 1000,
+                    "source_address_prefix": "*",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 8080
+                },
+                {
+                    "name": "SSH",
+                    "priority": 1010,
+                    "source_address_prefix": "*",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 22
+                }
+            ]
+        },
+        {
+            "name": "databaseNSG",
+            "rule": [
+                {
+                    "name": "databaseRule",
+                    "priority": 1000,
+                    "source_address_prefix": "10.0.0.0/16",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 3306
+                },
+                {
+                    "name": "SSH",
+                    "priority": 1010,
+                    "source_address_prefix": "*",
+                    "source_port_range": "*",
+                    "destination_address_prefix": "*",
+                    "destination_port_range": 22
+                }
+            ]
+        }
+    ],
+    "subnet": [
+        {
+            "name": "frontendSubnet",
+            "address_prefix": "10.0.1.0/24",
+            "network_security_group": "frontendNSG"
+        },
+        {
+            "name": "backendSubnet",
+            "address_prefix": "10.0.2.0/24",
+            "network_security_group": "backendNSG"
+        },
+        {
+            "name": "databaseSubnet",
+            "address_prefix": "10.0.3.0/24",
+            "network_security_group": "databaseNSG"
+        }
+    ],
+    "public_ip": [
+        {
+            "name": "front"
+        },
+        {
+            "name": "back"
+        },
+        {
+            "name": "database"
+        }
+    ],
+    "virtual_machine": [
+        {
+            "name": "databaseMasterVM",
+            "subnet": "databaseSubnet",
+            "private_ip_address": "10.0.3.5",
+            "public_ip_address": "database",
+            "deploy": [
+                {
+                    "type": "database",
+                    "port": 3306,
+                    "user": "user",
+                    "password": "password"
+                }
+            ]
+        },
+        {
+            "name": "databaseSlaveVM",
+            "subnet": "databaseSubnet",
+            "private_ip_address": "10.0.3.6",
+            "public_ip_address": "",
+            "deploy": [
+                {
+                    "type": "database-slave",
+                    "port": 3306,
+                    "user": "user",
+                    "password": "password",
+                    "master_address": "10.0.3.5",
+                    "master_port": 3306
+                }
+            ]
+        },
+        {
+            "name": "backendVM",
+            "subnet": "backendSubnet",
+            "private_ip_address": "10.0.2.5",
+            "public_ip_address": "back",
+            "deploy": [
+                {
+                    "type": "backend",
+                    "port": 8080,
+                    "database_ip": "10.0.3.5",
+                    "database_port": 3306,
+                    "database_user": "user",
+                    "database_password": "password"
+                }
+            ]
+        },
+        {
+            "name": "frontendVM",
+            "subnet": "frontendSubnet",
+            "private_ip_address": "10.0.1.5",
+            "public_ip_address": "front",
+            "deploy": [
+                {
+                    "type": "frontend",
+                    "port": 8080,
+                    "backend_address": "back",
+                    "backend_port": 8080
+                }
+            ]
+        }
+    ]
+}
